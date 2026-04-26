@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tradie Price App</title>
+<style>
+  :root {
+    --yellow: #FFD700;
+    --orange: #FF6B00;
+    --black: #0A0A0A;
+    --dark: #1A1A1A;
+    --dark2: #242424;
+    --card: #2A2A2A;
+    --border: #383838;
+    --text: #F0F0F0;
+    --muted: #888;
+    --green: #22C55E;
+    --blue: #3B82F6;
+    --red: #EF4444;
+    --white: #fff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--black); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; min-height: 100vh; }
+
+  /* HEADER */
+  .app-header { background: var(--dark); border-bottom: 2px solid var(--yellow); padding: 0; position: sticky; top: 0; z-index: 100; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; }
+  .app-logo { display: flex; align-items: center; gap: 8px; }
+  .logo-bolt { font-size: 22px; }
+  .logo-text { font-size: 14px; font-weight: 800; color: var(--yellow); letter-spacing: 0.5px; line-height: 1.1; }
+  .logo-sub { font-size: 10px; color: var(--muted); font-weight: 400; }
+  .header-actions { display: flex; gap: 8px; }
+  .hbtn { background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 11px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+  .hbtn.active { background: var(--yellow); color: var(--black); border-color: var(--yellow); }
+
+  /* NAV TABS */
+  .nav-tabs { display: flex; background: var(--dark); }
+  .nav-tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+  /* SEARCH */
+  .search-bar { padding: 10px 14px; background: var(--dark); border-bottom: 1px solid var(--border); }
+  .search-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px 10px 38px; color: var(--text); font-size: 15px; outline: none; }
+  .search-input:focus { border-color: var(--yellow); }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+
+  /* SECTIONS */
+  .sections-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
+  .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.15s; }
+  .section-card:active { transform: scale(0.97); background: var(--dark2); }
+  .section-icon { font-size: 24px; margin-bottom: 6px; }
+  .section-title { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .section-count { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .section-card.selected { border-color: var(--yellow); background: rgba(255,215,0,0.08); }
+
+  /* ITEMS LIST */
+  .items-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--dark); border-bottom: 1px solid var(--border); }
+  .back-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--text); font-size: 13px; cursor: pointer; font-weight: 600; }
+  .items-title { font-size: 14px; font-weight: 800; color: var(--yellow); flex: 1; }
+
+  .item-card { padding: 13px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+  .item-card:active { background: var(--dark2); }
+  .item-desc { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.35; margin-bottom: 6px; }
+  .item-code { font-size: 10px; color: var(--muted); font-family: monospace; margin-bottom: 8px; }
+  .price-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; }
+  .price-pill { background: var(--dark2); border-radius: 9px; padding: 8px 4px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; user-select: none; }
+  .price-pill:active { transform: scale(0.93); }
+  .price-pill.pp1:active, .price-pill.pp1:focus { border-color: var(--text);   background: rgba(255,255,255,0.10); }
+  .price-pill.pp2:active, .price-pill.pp2:focus { border-color: var(--blue);   background: rgba(59,130,246,0.15); }
+  .price-pill.pp3:active, .price-pill.pp3:focus { border-color: var(--green);  background: rgba(34,197,94,0.15); }
+  .price-pill.pp4:active, .price-pill.pp4:focus { border-color: var(--orange); background: rgba(255,107,0,0.15); }
+  .price-label { font-size: 9px; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .price-val { font-size: 14px; font-weight: 900; }
+  .price-tap  { font-size: 8px; color: var(--muted); margin-top: 3px; opacity: 0.7; }
+  .price-val.p1 { color: var(--text); }
+  .price-val.p2 { color: var(--blue); }
+  .price-val.p3 { color: var(--green); }
+  .price-val.p4 { color: var(--orange); }
+
+  /* PRICE TYPE SELECTOR */
+  .price-type-bar { display: flex; gap: 6px; padding: 10px 14px; background: var(--dark); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .pt-btn { flex-shrink: 0; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 2px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .pt-btn.active-p1 { border-color: var(--text); color: var(--text); background: rgba(255,255,255,0.08); }
+  .pt-btn.active-p2 { border-color: var(--blue); color: var(--blue); background: rgba(59,130,246,0.1); }
+  .pt-btn.active-p3 { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.1); }
+  .pt-btn.active-p4 { border-color: var(--orange); color: var(--orange); background: rgba(255,107,0,0.1); }
+
+  /* JOB SHEET */
+  .job-sheet { padding: 12px; }
+  .js-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .js-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+  .js-input { width: 100%; background: var(--dark2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; outline: none; margin-bottom: 8px; }
+  .js-input:focus { border-color: var(--yellow); }
+  .js-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* JOB ITEMS */
+  .job-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .job-item-info { flex: 1; }
+  .job-item-desc { font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .job-item-code { font-size: 10px; color: var(--muted); font-family: monospace; }
+  .job-item-price { font-size: 15px; font-weight: 800; color: var(--yellow); text-align: right; white-space: nowrap; }
+  .job-item-type { font-size: 9px; color: var(--muted); text-align: right; }
+  .remove-btn { background: rgba(239,68,68,0.15); border: none; color: var(--red); border-radius: 7px; padding: 6px 8px; font-size: 14px; cursor: pointer; flex-shrink: 0; }
+
+  /* TOTALS */
+  .total-box { background: var(--dark); border: 2px solid var(--yellow); border-radius: 12px; padding: 14px; margin-top: 4px; }
+  .total-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  .total-label { font-size: 13px; color: var(--muted); }
+  .total-val { font-size: 14px; font-weight: 700; color: var(--text); }
+  .total-row.grand { padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
+  .grand .total-label { font-size: 16px; color: var(--yellow); font-weight: 800; }
+  .grand .total-val { font-size: 22px; font-weight: 900; color: var(--yellow); }
+
+  /* ACTION BUTTONS */
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .action-btn { padding: 13px; border-radius: 10px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; text-align: center; }
+  .btn-export { background: var(--blue); color: white; }
+  .btn-export:active { opacity: 0.8; }
+  .btn-clear { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+  .btn-send { grid-column: 1/-1; background: var(--yellow); color: var(--black); padding: 15px; border-radius: 10px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; margin-top: 4px; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 50px 20px; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+  .empty-sub { font-size: 13px; }
+
+  /* BADGE */
+  .badge { background: var(--red); color: white; border-radius: 10px; padding: 2px 7px; font-size: 11px; font-weight: 800; margin-left: 4px; }
+  .badge-yellow { background: var(--yellow); color: var(--black); }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: flex-end; }
+  .modal { background: var(--dark); border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-height: 80vh; overflow-y: auto; border-top: 3px solid var(--yellow); }
+  .modal-title { font-size: 17px; font-weight: 900; color: var(--yellow); margin-bottom: 14px; }
+  .modal-close { float: right; background: var(--card); border: none; color: var(--text); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .hidden { display: none !important; }
+
+  /* EXPORT MODAL */
+  .export-option { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+  .export-option:active { background: var(--dark2); }
+  .export-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .export-desc { font-size: 12px; color: var(--muted); }
+  .export-badge { font-size: 10px; background: rgba(255,215,0,0.15); color: var(--yellow); border-radius: 5px; padding: 2px 8px; display: inline-block; margin-top: 6px; font-weight: 700; }
+
+  /* NOTIFICATION */
+  .notif { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; z-index: 300; transition: opacity 0.3s; white-space: nowrap; }
+
+  /* TIME BUTTONS */
+  .time-btn { background: var(--card); border: 2px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 6px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .time-btn:active { transform: scale(0.95); }
+  .time-btn.selected { background: var(--yellow); color: var(--black); border-color: var(--yellow); font-size: 14px; }
+
+  /* REFERENCE TABLE */
+  .ref-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px; }
+  .ref-header { padding: 12px 14px 6px; }
+  .ref-title { font-size: 14px; font-weight: 800; color: var(--yellow); }
+  .ref-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .ref-table { border-collapse: collapse; min-width: 700px; width: 100%; }
+  .ref-table th { background: var(--dark); color: var(--yellow); padding: 7px 8px; font-size: 11px; font-weight: 700; text-align: center; border: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+  .ref-table th.mat-col { background: var(--card); color: var(--text); min-width: 70px; position: sticky; left: 0; z-index: 3; }
+  .ref-table td { padding: 6px 8px; font-size: 12px; text-align: center; border: 1px solid var(--border); white-space: nowrap; }
+  .ref-table td.mat-val { background: var(--card); color: var(--yellow); font-weight: 800; font-size: 12px; position: sticky; left: 0; z-index: 1; border-right: 2px solid var(--yellow); }
+  .ref-table tr:nth-child(even) td { background: var(--dark2); }
+  .ref-table tr:nth-child(odd) td { background: var(--dark); }
+  .ref-table td.mat-val { background: var(--card) !important; }
+  .ref-note { padding: 10px 14px; font-size: 11px; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); margin-top: 4px; }
+  .ref-highlight { background: rgba(255,215,0,0.15) !important; color: var(--yellow) !important; font-weight: 800; }
+  .sig-canvas { width: 100%; height: 120px; background: white; border-radius: 10px; border: 2px solid var(--border); touch-action: none; cursor: crosshair; display: block; }
+  .sig-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .sig-clear { font-size: 11px; color: var(--red); background: none; border: none; cursor: pointer; float: right; padding: 0; margin-bottom: 6px; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-top">
+    <div class="app-logo">
+      <span class="logo-bolt">⚡</span>
+      <div>
+        <div class="logo-text">TRADIE PRICE APP</div>
+        <div class="logo-sub">Electrical · Data · Air Conditioning</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="hbtn" onclick="showExportModal()">📤 Export</button>
+      <button class="hbtn active" onclick="switchTab('jobsheet')" id="cart-btn">
+        🧾 Job <span class="badge badge-yellow" id="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-browse" onclick="switchTab('browse')">📋 Price Book</div>
+    <div class="nav-tab" id="tab-jobsheet" onclick="switchTab('jobsheet')">📄 Job Sheet</div>
+    <div class="nav-tab" id="tab-reftable" onclick="switchTab('reftable')">📊 Ref Table</div>
+    <div class="nav-tab" id="tab-guide" onclick="switchTab('guide')">ℹ️ Guide</div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif hidden" id="notif"></div>
+
+<!-- ============================================================ -->
+<!-- BROWSE VIEW -->
+<!-- ============================================================ -->
+<div class="view active" id="view-browse">
+
+  <!-- Price type selector -->
+  <div class="price-type-bar">
+    <button class="pt-btn active-p1" id="ptbtn-1" onclick="setPriceType(1)">Regular Rate (incl. callout)</button>
+    <button class="pt-btn" id="ptbtn-2" onclick="setPriceType(2)">Add-On (no callout)</button>
+    <button class="pt-btn" id="ptbtn-3" onclick="setPriceType(3)">Discounted Rate</button>
+    <button class="pt-btn" id="ptbtn-4" onclick="setPriceType(4)">Disc. Add-On</button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search-input" type="text" placeholder="Search jobs or item code..." oninput="handleSearch()">
+    </div>
+  </div>
+
+  <!-- Sections grid -->
+  <div id="sections-view">
+    <div class="sections-grid" id="sections-grid"></div>
+  </div>
+
+  <!-- Items list -->
+  <div id="items-view" class="hidden">
+    <div class="items-header">
+      <button class="back-btn" onclick="backToSections()">← Back</button>
+      <div class="items-title" id="items-title">Items</div>
+    </div>
+    <div id="items-list"></div>
+  </div>
+
+  <!-- Search results -->
+  <div id="search-view" class="hidden">
+    <div class="items-header">
+      <div class="items-title" id="search-title">Results</div>
+    </div>
+    <div id="search-list"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- JOB SHEET VIEW -->
+<!-- ============================================================ -->
+<div class="view" id="view-jobsheet">
+  <div class="job-sheet">
+
+    <!-- Customer details -->
+    <div class="js-section">
+      <div class="js-label">Customer Details</div>
+      <input class="js-input" id="js-customer" type="text" placeholder="Customer name">
+      <div class="js-row">
+        <input class="js-input" id="js-phone" type="tel" placeholder="Phone">
+        <input class="js-input" id="js-date" type="date">
+      </div>
+      <input class="js-input" id="js-address" type="text" placeholder="Site address">
+      <input class="js-input" id="js-tech" type="text" placeholder="Technician name" value="David Weller">
+      <input class="js-input" id="js-jobnr" type="text" placeholder="Job / Quote number">
+    </div>
+
+    <!-- Line items -->
+    <div class="js-section">
+      <div class="js-label">Line Items</div>
+      <div id="job-items-list">
+        <div class="empty" id="job-empty">
+          <div class="empty-icon">📋</div>
+          <div class="empty-text">No items added yet</div>
+          <div class="empty-sub">Go to Price Book to add items</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="total-box" id="totals-box">
+      <div class="total-row">
+        <span class="total-label">Subtotal (ex GST)</span>
+        <span class="total-val" id="tot-ex">$0</span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">GST (10%)</span>
+        <span class="total-val" id="tot-gst">$0</span>
+      </div>
+      <div class="total-row grand">
+        <span class="total-label">TOTAL (incl. GST)</span>
+        <span class="total-val" id="tot-inc">$0</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="js-section" style="margin-top:12px">
+      <div class="js-label">Notes / Special Conditions</div>
+      <textarea class="js-input" id="js-notes" rows="3" placeholder="Any notes for this job..."></textarea>
+    </div>
+
+    <!-- Signature -->
+    <div class="js-section">
+      <div class="js-label">Customer Signature
+        <button class="sig-clear" onclick="clearSig()">Clear</button>
+      </div>
+      <div class="sig-label">Sign below to accept this quote</div>
+      <canvas class="sig-canvas" id="sig-canvas"></canvas>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <button class="action-btn btn-export" onclick="exportCSV()">📊 Export CSV</button>
+      <button class="action-btn btn-clear" onclick="clearJob()">🗑️ Clear All</button>
+    </div>
+    <button class="action-btn btn-send" onclick="generateJobSheet()">📄 Generate Job Sheet PDF</button>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PRICING REFERENCE TABLE VIEW -->
+<!-- ============================================================ -->
+<div class="view" id="view-reftable">
+  <div class="ref-header">
+    <div class="ref-title">📊 Job Price Calculator</div>
+    <div class="ref-sub">Enter material cost · tap a labour time · prices calculate instantly</div>
+  </div>
+
+  <div class="job-sheet" style="padding:12px">
+
+    <!-- Assumptions -->
+    <div class="js-section">
+      <div class="js-label">Pricing Assumptions</div>
+      <div class="js-row">
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Labour Rate ($/hr)</div>
+          <input class="js-input" id="calc-rate" type="number" value="185" min="0" oninput="calcPrice()" style="margin-bottom:0;font-size:16px;font-weight:700;color:var(--yellow)">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Material Markup (%)</div>
+          <input class="js-input" id="calc-markup" type="number" value="30" min="0" max="100" oninput="calcPrice()" style="margin-bottom:0;font-size:16px;font-weight:700;color:var(--yellow)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Material cost input -->
+    <div class="js-section">
+      <div class="js-label">Material Cost ($) — what YOU pay before markup</div>
+      <input class="js-input" id="calc-mat" type="number" placeholder="e.g. 157" min="0"
+        oninput="calcPrice()"
+        style="font-size:26px;font-weight:900;color:var(--white);margin-bottom:0;text-align:center;letter-spacing:1px">
+    </div>
+
+    <!-- Labour time button grid -->
+    <div class="js-section">
+      <div class="js-label">Labour Time — tap to select</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="time-chips">
+        <button class="time-btn" onclick="setTime(0.5,  this)">30 mins</button>
+        <button class="time-btn" onclick="setTime(0.75, this)">45 mins</button>
+        <button class="time-btn" onclick="setTime(1,    this)">1 hr</button>
+        <button class="time-btn" onclick="setTime(1.5,  this)">1.5 hrs</button>
+        <button class="time-btn" onclick="setTime(2,    this)">2 hrs</button>
+        <button class="time-btn" onclick="setTime(2.5,  this)">2.5 hrs</button>
+        <button class="time-btn" onclick="setTime(3,    this)">3 hrs</button>
+        <button class="time-btn" onclick="setTime(3.5,  this)">3.5 hrs</button>
+        <button class="time-btn" onclick="setTime(4,    this)">4 hrs</button>
+        <button class="time-btn" onclick="setTime(4.5,  this)">4.5 hrs</button>
+        <button class="time-btn" onclick="setTime(5,    this)">5 hrs</button>
+        <button class="time-btn" onclick="setTime(6,    this)">6 hrs</button>
+        <button class="time-btn" onclick="setTime(7,    this)">7 hrs</button>
+        <button class="time-btn" onclick="setTime(8,    this)">8 hrs</button>
+        <button class="time-btn" onclick="setTime(9,    this)">9 hrs</button>
+      </div>
+      <input type="hidden" id="calc-hrs" value="">
+    </div>
+
+    <!-- Result -->
+    <div id="calc-result" style="display:none">
+      <div class="js-section" style="border:2px solid var(--yellow)">
+        <div class="js-label" style="color:var(--yellow)">Calculated Prices</div>
+        <div style="background:var(--dark2);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--muted);line-height:1.9" id="calc-breakdown"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px" id="calc-prices-grid"></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Job Description (for job sheet)</div>
+        <input class="js-input" id="calc-desc" type="text" placeholder="e.g. Supply & install exhaust fan" style="margin-bottom:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="calc-add-btns"></div>
+      </div>
+    </div>
+
+    <div id="calc-placeholder" style="text-align:center;padding:30px 20px;color:var(--muted)">
+      <div style="font-size:40px;margin-bottom:10px">🧮</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text)">Enter material cost &amp; tap a labour time</div>
+      <div style="font-size:12px;margin-top:4px">All 4 prices calculate instantly</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- GUIDE VIEW -->
+<!-- ============================================================ -->
+<div class="view" id="view-guide">
+  <div class="job-sheet">
+    <div class="js-section">
+      <div class="js-label">How Pricing Works</div>
+      <div style="color:var(--text);font-size:13.5px;line-height:1.7">
+        <p style="margin-bottom:12px"><strong style="color:var(--yellow)">Regular Rate</strong> — First job on site. Includes the call-out fee. Use this for the first item you quote.</p>
+        <p style="margin-bottom:12px"><strong style="color:var(--blue)">Add-On Rate</strong> — Extra work on the same visit. No call-out fee included. Higher margin for you.</p>
+        <p style="margin-bottom:12px"><strong style="color:var(--green)">Discounted Rate</strong> — 15% off regular rate. Includes call-out. Use for members, promotions or real estate clients.</p>
+        <p style="margin-bottom:12px"><strong style="color:var(--orange)">Discounted Add-On</strong> — 15% off add-on rate. No call-out. For extra discounted work on same visit.</p>
+        <div style="background:var(--card);border-radius:10px;padding:12px;margin-top:8px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase">Tip — Smart Pricing Flow</div>
+          <div style="font-size:12.5px;color:var(--muted)">Job 1 → Regular Rate<br>Each extra job same visit → Add-On Rate<br>Regular customers → Discounted Rate</div>
+        </div>
+      </div>
+    </div>
+    <div class="js-section">
+      <div class="js-label">SimPro & ServiceM8</div>
+      <div style="color:var(--text);font-size:13.5px;line-height:1.7">
+        <p style="margin-bottom:10px">Use the <strong style="color:var(--yellow)">Export CSV</strong> button on the Job Sheet to generate a file ready to import into:</p>
+        <p style="margin-bottom:8px">✅ <strong>ServiceM8</strong> — Import via Settings → Materials & Services → Import Items</p>
+        <p>✅ <strong>SimPro</strong> — Import via Utilities → Import → Catalogue → Generic</p>
+      </div>
+    </div>
+    <div class="js-section">
+      <div class="js-label">About</div>
+      <div style="color:var(--muted);font-size:12.5px;line-height:1.7">
+        Built by <strong style="color:var(--text)">David Weller</strong><br>
+        Electrical Estimator & Pricing Consultant<br>
+        Former Brisbane Electrical & AC Contractor<br><br>
+        📲 0455 345 508<br>
+        📧 dweller5284@gmail.com<br><br>
+        <em>System built from 5 years of real-world use — not theory.</em>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay hidden" id="export-modal" onclick="closeExportModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeExportModal()">✕ Close</button>
+    <div class="modal-title">📤 Export Options</div>
+    <div class="export-option" onclick="exportServiceM8()">
+      <div class="export-name">ServiceM8 Import</div>
+      <div class="export-desc">Export job items as a CSV ready to import into ServiceM8 Materials & Services</div>
+      <div class="export-badge">Settings → Materials & Services → Import</div>
+    </div>
+    <div class="export-option" onclick="exportSimPro()">
+      <div class="export-name">SimPro Catalogue Import</div>
+      <div class="export-desc">Export as SimPro-compatible catalogue CSV with group, part number and pricing</div>
+      <div class="export-badge">Utilities → Import → Catalogue → Generic</div>
+    </div>
+    <div class="export-option" onclick="exportCSV()">
+      <div class="export-name">Job Sheet CSV</div>
+      <div class="export-desc">Export the current job sheet as a standard CSV file</div>
+      <div class="export-badge">Works with Excel, Numbers & Google Sheets</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PRICE BOOK DATA ──────────────────────────────────────────────────────────
+const SECTIONS = [{"title": "Fault Find", "items": [{"code": "FF-0000-0015", "desc": "Minimum Fault Find", "p1": 159, "p2": 71, "p3": 135, "p4": 47}, {"code": "FF-0000-0030", "desc": "Minor Fault Find", "p1": 231, "p2": 143, "p3": 196, "p4": 108}, {"code": "FF-0000-0045", "desc": "Intermediate Fault Find", "p1": 302, "p2": 214, "p3": 257, "p4": 169}, {"code": "FF-0000-0060", "desc": "Standard Fault Find", "p1": 373, "p2": 285, "p3": 317, "p4": 229}, {"code": "FF-0000-0090", "desc": "Moderate Fault Find", "p1": 516, "p2": 428, "p3": 439, "p4": 351}, {"code": "FF-0000-0120", "desc": "Major Fault Find", "p1": 658, "p2": 570, "p3": 559, "p4": 471}]}, {"title": "Hot Water - Installation & Repairs", "items": [{"code": "HWS-0045-0060", "desc": "Supply & Replace Any Element To Electric Hot Water System", "p1": 432, "p2": 344, "p3": 367, "p4": 279}, {"code": "HWS-0045-0045", "desc": "Supply & Replace Any Thermostat To Electric Hot Water System", "p1": 360, "p2": 272, "p3": 306, "p4": 218}, {"code": "HWS-0090-0060", "desc": "Supply & Replace Any Element & Thermostat To Electric Hot Water System", "p1": 490, "p2": 402, "p3": 417, "p4": 329}, {"code": "HWS-0050-0060", "desc": "Extend Circuit For Hot Water System", "p1": 438, "p2": 350, "p3": 372, "p4": 284}, {"code": "HWS-0050-0090", "desc": "Extend Circuit For Hot Water System", "p1": 581, "p2": 493, "p3": 494, "p4": 406}, {"code": "HWS-0070-0060", "desc": "Supply & Install New Circuit For Hot Water System", "p1": 464, "p2": 376, "p3": 394, "p4": 306}, {"code": "HWS-0070-0090", "desc": "Supply & Install New Circuit For Hot Water System", "p1": 607, "p2": 519, "p3": 516, "p4": 428}, {"code": "HWS-0070-0120", "desc": "Supply & Install New Circuit For Hot Water System", "p1": 749, "p2": 661, "p3": 637, "p4": 549}]}, {"title": "Appliance - Disconnect & Reconnect", "items": [{"code": "ADR-0010-0045", "desc": "Connect Appliance", "p1": 315, "p2": 227, "p3": 268, "p4": 180}, {"code": "ADR-0010-0030", "desc": "Disconnect Appliance (Make Safe)", "p1": 244, "p2": 156, "p3": 207, "p4": 119}, {"code": "ADR-0010-0060", "desc": "Disconnect Old Appliance, Connect New Appliance (Single Visit)", "p1": 386, "p2": 298, "p3": 328, "p4": 240}, {"code": "ADR-0010-0090", "desc": "Disconnect Old Appliance, Connect New Appliance (Two Visits)", "p1": 529, "p2": 441, "p3": 450, "p4": 362}, {"code": "ADR-0080-0060", "desc": "Supply & Install New Circuit for Standard Cooktop/Oven", "p1": 477, "p2": 389, "p3": 405, "p4": 317}, {"code": "ADR-0080-0090", "desc": "Supply & Install New Circuit for Standard Cooktop/Oven", "p1": 620, "p2": 532, "p3": 527, "p4": 439}, {"code": "ADR-0150-0120", "desc": "Supply & Install New Circuit for Induction Cooktop", "p1": 853, "p2": 765, "p3": 725, "p4": 637}, {"code": "ADR-0015-0090", "desc": "Install Customer Supplied Range Hood", "p1": 535, "p2": 447, "p3": 455, "p4": 367}, {"code": "ADR-0000-0060", "desc": "Replace Customer Supplied Range Hood", "p1": 373, "p2": 285, "p3": 317, "p4": 229}]}, {"title": "Lights - Installation", "items": [{"code": "LI-0005-0030", "desc": "Repair/Refix Light Fitting or disconnect and make safe", "p1": 237, "p2": 149, "p3": 201, "p4": 113}, {"code": "LI-0010-0030", "desc": "Install Customer Supplied Internal Light Fitting", "p1": 244, "p2": 156, "p3": 207, "p4": 119}, {"code": "LI-0040-0060", "desc": "Install Customer Supplied Internal Light Fitting", "p1": 425, "p2": 337, "p3": 361, "p4": 273}, {"code": "LI-0050-0060", "desc": "Install Customer Supplied External Light Fitting", "p1": 438, "p2": 350, "p3": 372, "p4": 284}, {"code": "LI-0040-0090", "desc": "Install Customer Supplied Internal/External Light Fitting", "p1": 568, "p2": 480, "p3": 483, "p4": 395}, {"code": "LI-0025-0090", "desc": "Install Customer Supplied IXL Fitting", "p1": 548, "p2": 460, "p3": 466, "p4": 378}, {"code": "LI-0025-0120", "desc": "Install Customer Supplied IXL Fitting", "p1": 691, "p2": 603, "p3": 587, "p4": 499}, {"code": "LI-0005-0060", "desc": "Disconnect old fitting and install customer supplied new fitting", "p1": 380, "p2": 292, "p3": 323, "p4": 235}, {"code": "LI-0070-0060", "desc": "Supply & Install 2ft Batten LED fitting", "p1": 464, "p2": 376, "p3": 394, "p4": 306}, {"code": "LI-0100-0060", "desc": "Supply & Install 4ft Batten LED fitting", "p1": 503, "p2": 415, "p3": 428, "p4": 340}, {"code": "LI-0080-0060", "desc": "Supply & Install Small LED Oyster Light fitting", "p1": 477, "p2": 389, "p3": 405, "p4": 317}, {"code": "LI-0110-0060", "desc": "Supply & Install Large LED Oyster Light fitting", "p1": 516, "p2": 428, "p3": 439, "p4": 351}, {"code": "LI-0050-0045", "desc": "Supply & Install 1x LED Downlight", "p1": 367, "p2": 279, "p3": 312, "p4": 224}, {"code": "LI-0090-0060", "desc": "Supply & Install 2x LED Downlights", "p1": 490, "p2": 402, "p3": 417, "p4": 329}, {"code": "LI-0130-0060", "desc": "Supply & Install 3x LED Downlights", "p1": 542, "p2": 454, "p3": 461, "p4": 373}, {"code": "LI-0160-0090", "desc": "Supply & Install 4x LED Downlights", "p1": 724, "p2": 636, "p3": 615, "p4": 527}, {"code": "LI-0190-0090", "desc": "Supply & Install 5x LED Downlights", "p1": 763, "p2": 675, "p3": 649, "p4": 561}, {"code": "LI-0210-0120", "desc": "Supply & Install 6x LED Downlights", "p1": 931, "p2": 843, "p3": 791, "p4": 703}, {"code": "LI-0270-0120", "desc": "Supply & Install 8x LED Downlights", "p1": 1009, "p2": 921, "p3": 858, "p4": 770}, {"code": "LI-0330-0150", "desc": "Supply & Install 10x LED Downlights", "p1": 1230, "p2": 1142, "p3": 1046, "p4": 958}, {"code": "LI-0550-0180", "desc": "Supply & Install 15x LED Downlights", "p1": 1658, "p2": 1570, "p3": 1409, "p4": 1321}, {"code": "LI-0730-0240", "desc": "Supply & Install 20x LED Downlights", "p1": 2177, "p2": 2089, "p3": 1850, "p4": 1762}, {"code": "LI-0950-0300", "desc": "Supply & Install 25x LED Downlights", "p1": 2748, "p2": 2660, "p3": 2336, "p4": 2248}, {"code": "LI-0150-0090", "desc": "Supply & Install IXL 2x Heat Lamp Fitting", "p1": 711, "p2": 623, "p3": 604, "p4": 516}, {"code": "LI-0180-0090", "desc": "Supply & Install IXL 4x Heat Lamp Fitting", "p1": 750, "p2": 662, "p3": 638, "p4": 550}]}, {"title": "Lights - Replacement", "items": [{"code": "LR-0000-0030", "desc": "Replace Customer Supplied Light Fitting (30 min)", "p1": 231, "p2": 143, "p3": 196, "p4": 108}, {"code": "LR-0000-0045", "desc": "Replace Customer Supplied Light Fitting (45 min)", "p1": 302, "p2": 214, "p3": 257, "p4": 169}, {"code": "LR-0000-0060", "desc": "Replace Customer Supplied Light Fitting (60 min)", "p1": 373, "p2": 285, "p3": 317, "p4": 229}, {"code": "LR-0020-0010", "desc": "Supply & Replace ES/BC LED Bulb", "p1": 162, "p2": 74, "p3": 138, "p4": 50}, {"code": "LR-0060-0030", "desc": "Supply & Replace 2ft Batten LED Fitting", "p1": 309, "p2": 221, "p3": 263, "p4": 175}, {"code": "LR-0080-0030", "desc": "Supply & Replace 4ft Batten LED Fitting", "p1": 335, "p2": 247, "p3": 285, "p4": 197}, {"code": "LR-0050-0030", "desc": "Supply & Replace Small LED Oyster Light Fitting", "p1": 296, "p2": 208, "p3": 252, "p4": 164}, {"code": "LR-0080-0030", "desc": "Supply & Replace Large LED Oyster Light Fitting", "p1": 335, "p2": 247, "p3": 285, "p4": 197}, {"code": "LR-0040-0015", "desc": "Supply & Replace 1x LED Downlight Fitting", "p1": 211, "p2": 123, "p3": 179, "p4": 91}, {"code": "LR-0080-0030", "desc": "Supply & Replace 2x LED Downlight Fittings", "p1": 335, "p2": 247, "p3": 285, "p4": 197}, {"code": "LR-0120-0030", "desc": "Supply & Replace 3x LED Downlight Fittings", "p1": 387, "p2": 299, "p3": 329, "p4": 241}, {"code": "LR-0150-0045", "desc": "Supply & Replace 4x LED Downlight Fittings", "p1": 497, "p2": 409, "p3": 422, "p4": 334}, {"code": "LR-0180-0045", "desc": "Supply & Replace 5x LED Downlight Fittings", "p1": 536, "p2": 448, "p3": 456, "p4": 368}, {"code": "LR-0210-0060", "desc": "Supply & Replace 6x LED Downlight Fittings", "p1": 646, "p2": 558, "p3": 549, "p4": 461}, {"code": "LR-0280-0075", "desc": "Supply & Replace 8x LED Downlight Fittings", "p1": 808, "p2": 720, "p3": 687, "p4": 599}, {"code": "LR-0350-0090", "desc": "Supply & Replace 10x LED Downlight Fittings", "p1": 971, "p2": 883, "p3": 825, "p4": 737}]}, {"title": "Power Points - Installation", "items": [{"code": "PPI-0025-0030", "desc": "Supply & Install Single Power Point 10a (30 min)", "p1": 263, "p2": 175, "p3": 224, "p4": 136}, {"code": "PPI-0035-0060", "desc": "Supply & Install Single Power Point 10a (60 min)", "p1": 419, "p2": 331, "p3": 356, "p4": 268}, {"code": "PPI-0065-0090", "desc": "Supply & Install Single Power Point 10a (90 min)", "p1": 600, "p2": 512, "p3": 510, "p4": 422}, {"code": "PPI-0015-0030", "desc": "Supply & Install Double Power Point 10a (30 min)", "p1": 250, "p2": 162, "p3": 213, "p4": 125}, {"code": "PPI-0030-0060", "desc": "Supply & Install Double Power Point 10a (60 min)", "p1": 412, "p2": 324, "p3": 350, "p4": 262}, {"code": "PPI-0050-0090", "desc": "Supply & Install Double Power Point 10a (90 min)", "p1": 581, "p2": 493, "p3": 494, "p4": 406}, {"code": "PPI-0035-0030", "desc": "Supply & Install Quad Power Point 10a", "p1": 276, "p2": 188, "p3": 235, "p4": 147}, {"code": "PPI-0050-0030", "desc": "Supply & Install Single Weather Proof Power Point 10a", "p1": 296, "p2": 208, "p3": 252, "p4": 164}, {"code": "PPI-0100-0060", "desc": "Supply & Install Single Power Point 15a", "p1": 503, "p2": 415, "p3": 428, "p4": 340}, {"code": "PPI-0120-0060", "desc": "Supply & Install Single Power Point 20a", "p1": 529, "p2": 441, "p3": 450, "p4": 362}, {"code": "PPI-0060-0030", "desc": "Supply & Install Double Power Point With Double USB (30 min)", "p1": 309, "p2": 221, "p3": 263, "p4": 175}, {"code": "PPI-0080-0060", "desc": "Supply & Install Double Power Point With Double USB (60 min)", "p1": 477, "p2": 389, "p3": 405, "p4": 317}]}, {"title": "Power Points - Replacement", "items": [{"code": "PPR-0010-0015", "desc": "Supply & Replace Single Power Point 10a", "p1": 172, "p2": 84, "p3": 146, "p4": 58}, {"code": "PPR-0010-0015", "desc": "Supply & Replace Double Power Point 10a", "p1": 172, "p2": 84, "p3": 146, "p4": 58}, {"code": "PPR-0025-0015", "desc": "Supply & Replace Quad Power Point 10a", "p1": 192, "p2": 104, "p3": 163, "p4": 75}, {"code": "PPR-0045-0030", "desc": "Supply & Replace Single Weather Proof Power Point 10a", "p1": 289, "p2": 201, "p3": 246, "p4": 158}, {"code": "PPR-0030-0015", "desc": "Supply & Replace Single Power Point 15a", "p1": 198, "p2": 110, "p3": 168, "p4": 80}, {"code": "PPR-0040-0015", "desc": "Supply & Replace Single Power Point 20a", "p1": 211, "p2": 123, "p3": 179, "p4": 91}, {"code": "PPR-0050-0015", "desc": "Supply & Replace Double Power Point With Double USB", "p1": 224, "p2": 136, "p3": 190, "p4": 102}]}, {"title": "Switches - Installation", "items": [{"code": "SI-0015-0030", "desc": "Supply & Install One Gang Switch 10a", "p1": 250, "p2": 162, "p3": 213, "p4": 125}, {"code": "SI-0020-0030", "desc": "Supply & Install Two Gang Switch 10a", "p1": 257, "p2": 169, "p3": 218, "p4": 130}, {"code": "SI-0025-0030", "desc": "Supply & Install Three Gang Switch 10a", "p1": 263, "p2": 175, "p3": 224, "p4": 136}, {"code": "SI-0030-0030", "desc": "Supply & Install Four Gang Switch 10a", "p1": 270, "p2": 182, "p3": 230, "p4": 142}, {"code": "SI-0020-0045", "desc": "Supply & Install Pull Cord Switch 10a", "p1": 328, "p2": 240, "p3": 279, "p4": 191}, {"code": "SI-0030-0045", "desc": "Supply & Install One Gang Weather Proof Switch 10a", "p1": 341, "p2": 253, "p3": 290, "p4": 202}, {"code": "SI-0070-0015", "desc": "Supply & Install Complete Dimmer", "p1": 250, "p2": 162, "p3": 213, "p4": 125}, {"code": "SI-0050-0060", "desc": "Supply & Install Cooker 45amp Switch", "p1": 438, "p2": 350, "p3": 372, "p4": 284}]}, {"title": "Switches - Replacement", "items": [{"code": "SR-0010-0015", "desc": "Supply & Replace One Gang Switch 10a", "p1": 172, "p2": 84, "p3": 146, "p4": 58}, {"code": "SR-0015-0015", "desc": "Supply & Replace Two Gang Switch 10a", "p1": 179, "p2": 91, "p3": 152, "p4": 64}, {"code": "SR-0020-0015", "desc": "Supply & Replace Three Gang Switch 10a", "p1": 185, "p2": 97, "p3": 157, "p4": 69}, {"code": "SR-0025-0015", "desc": "Supply & Replace Four Gang Switch 10a", "p1": 192, "p2": 104, "p3": 163, "p4": 75}, {"code": "SR-0020-0030", "desc": "Supply & Replace One Gang Weather Proof Switch 10a", "p1": 257, "p2": 169, "p3": 218, "p4": 130}, {"code": "SR-0050-0020", "desc": "Supply & Replace Dimmer Mechanism Only", "p1": 248, "p2": 160, "p3": 211, "p4": 123}, {"code": "SR-0050-0020", "desc": "Supply & Replace Cooker 45amp Switch", "p1": 248, "p2": 160, "p3": 211, "p4": 123}]}, {"title": "Fans - Installation & Replacement", "items": [{"code": "FIR-0005-0045", "desc": "Replace Existing Ceiling Fan (Customer Supplied)", "p1": 308, "p2": 220, "p3": 262, "p4": 174}, {"code": "FIR-0015-0090", "desc": "Install Ceiling Fan (Customer Supplied)", "p1": 535, "p2": 447, "p3": 455, "p4": 367}, {"code": "FIR-0100-0090", "desc": "Supply & Install Airflow Ceiling Fan - White", "p1": 646, "p2": 558, "p3": 549, "p4": 461}, {"code": "FIR-0120-0090", "desc": "Supply & Install Airflow Ceiling Fan/Light - White", "p1": 672, "p2": 584, "p3": 571, "p4": 483}, {"code": "FIR-0140-0090", "desc": "Supply & Install Airflow Ceiling Fan/Light With Remote - White", "p1": 698, "p2": 610, "p3": 593, "p4": 505}, {"code": "FIR-0050-0020", "desc": "Supply & Replace 200-250mm Ceiling Exhaust Fan", "p1": 248, "p2": 160, "p3": 211, "p4": 123}, {"code": "FIR-0070-0045", "desc": "Supply & Install New 200-250mm Ceiling Exhaust Fan", "p1": 393, "p2": 305, "p3": 334, "p4": 246}, {"code": "FIR-0100-0060", "desc": "Supply & Install 200-250mm Exhaust Fan With Extra Switch", "p1": 503, "p2": 415, "p3": 428, "p4": 340}]}, {"title": "Smoke Alarms", "items": [{"code": "SA-0095-0060", "desc": "Supply & Install 1x 240v Photoelectric Smoke Alarm - 10 Year Battery", "p1": 497, "p2": 409, "p3": 422, "p4": 334}, {"code": "SA-0190-0090", "desc": "Supply & Install 2x 240v Photoelectric Smoke Alarms - 10 Year Battery", "p1": 763, "p2": 675, "p3": 649, "p4": 561}, {"code": "SA-0285-0105", "desc": "Supply & Install 3x 240v Photoelectric Smoke Alarms - 10 Year Battery", "p1": 957, "p2": 869, "p3": 813, "p4": 725}, {"code": "SA-0380-0120", "desc": "Supply & Install 4x 240v Photoelectric Smoke Alarms - 10 Year Battery", "p1": 1152, "p2": 1064, "p3": 979, "p4": 891}, {"code": "SA-0475-0150", "desc": "Supply & Install 5x 240v Photoelectric Smoke Alarms - 10 Year Battery", "p1": 1418, "p2": 1330, "p3": 1205, "p4": 1117}, {"code": "SA-0100-0020", "desc": "Supply & Replace 1x 240v Photoelectric Smoke Alarm", "p1": 313, "p2": 225, "p3": 266, "p4": 178}, {"code": "SA-0200-0030", "desc": "Supply & Replace 2x 240v Photoelectric Smoke Alarms", "p1": 491, "p2": 403, "p3": 417, "p4": 329}, {"code": "SA-0300-0040", "desc": "Supply & Replace 3x 240v Photoelectric Smoke Alarms", "p1": 668, "p2": 580, "p3": 568, "p4": 480}]}, {"title": "Testing", "items": [{"code": "TES-0000-0060", "desc": "Electrical Test of Standard House", "p1": 373, "p2": 285, "p3": 317, "p4": 229}, {"code": "TES-0000-0090", "desc": "Electrical Test of Non-Standard House", "p1": 516, "p2": 428, "p3": 439, "p4": 351}, {"code": "TES-0000-0030", "desc": "Safety Switch Testing of Domestic Property", "p1": 231, "p2": 143, "p3": 196, "p4": 108}, {"code": "TES-0025-0090", "desc": "Emergency Lighting Test", "p1": 548, "p2": 460, "p3": 466, "p4": 378}, {"code": "TES-0000-0060", "desc": "Pre Purchase Inspection - Visual Only", "p1": 373, "p2": 285, "p3": 317, "p4": 229}]}, {"title": "Testing - Commercial", "items": [{"code": "TCP-0025-0030", "desc": "Test & Tag - Up to 10 Items", "p1": 263, "p2": 175, "p3": 224, "p4": 136}, {"code": "TCP-0050-0090", "desc": "Test & Tag - Up to 50 Items", "p1": 581, "p2": 493, "p3": 494, "p4": 406}, {"code": "TCP-0070-0180", "desc": "Test & Tag - Up to 100 Items", "p1": 1034, "p2": 946, "p3": 879, "p4": 791}, {"code": "TCP-0080-0030", "desc": "Supply & Replace 1x Circuit Breaker/Safety Switch Combo", "p1": 335, "p2": 247, "p3": 285, "p4": 197}, {"code": "TCP-0020-0060", "desc": "Safety Switch Testing of Commercial Property", "p1": 399, "p2": 311, "p3": 339, "p4": 251}]}, {"title": "Miscellaneous", "items": [{"code": "MIS-0200-0120", "desc": "Supply & Install New Door Bell - Hard Wired", "p1": 918, "p2": 830, "p3": 780, "p4": 692}, {"code": "MIS-0100-0030", "desc": "Supply & Install New Wireless Doorbell", "p1": 361, "p2": 273, "p3": 307, "p4": 219}, {"code": "MIS-0350-0030", "desc": "Supply & Install New Wireless Video Intercom", "p1": 686, "p2": 598, "p3": 583, "p4": 495}, {"code": "MIS-0130-0030", "desc": "Supply & Install 16amp 24 Hour Din Rail Time Clock", "p1": 400, "p2": 312, "p3": 340, "p4": 252}, {"code": "MIS-0150-0060", "desc": "Supply & Install Single Phase Clipsal Centameter", "p1": 568, "p2": 480, "p3": 483, "p4": 395}, {"code": "MIS-0750-0060", "desc": "Supply & Install Optidrive Pool Inverter", "p1": 1348, "p2": 1260, "p3": 1146, "p4": 1058}]}, {"title": "Switchboard - Repairs", "items": [{"code": "SBR-0008-0030", "desc": "Supply & Replace Single Phase Circuit Breaker", "p1": 241, "p2": 153, "p3": 205, "p4": 117}, {"code": "SBR-0030-0030", "desc": "Supply & Replace Three Phase Circuit Breaker", "p1": 270, "p2": 182, "p3": 230, "p4": 142}, {"code": "SBR-0035-0030", "desc": "Supply & Replace 1x One Pole RCD Circuit Breaker", "p1": 276, "p2": 188, "p3": 235, "p4": 147}, {"code": "SBR-0070-0030", "desc": "Supply & Replace 2x One Pole RCD Circuit Breakers", "p1": 322, "p2": 234, "p3": 274, "p4": 186}, {"code": "SBR-0105-0045", "desc": "Supply & Replace 3x One Pole RCD Circuit Breakers", "p1": 407, "p2": 319, "p3": 346, "p4": 258}, {"code": "SBR-0140-0045", "desc": "Supply & Replace 4x One Pole RCD Circuit Breakers", "p1": 484, "p2": 396, "p3": 411, "p4": 323}, {"code": "SBR-0175-0060", "desc": "Supply & Replace 5x One Pole RCD Circuit Breakers", "p1": 601, "p2": 513, "p3": 511, "p4": 423}, {"code": "SBR-0035-0030", "desc": "Supply & Replace Two Pole RCD/Circuit Breaker Combo", "p1": 276, "p2": 188, "p3": 235, "p4": 147}]}, {"title": "Switchboard & Meter Box Upgrades", "items": [{"code": "SBU-0010-0030", "desc": "Supply & Install Single Phase Circuit Breaker On Existing Din Rail", "p1": 244, "p2": 156, "p3": 207, "p4": 119}, {"code": "SBU-0035-0030", "desc": "Supply & Install Single or Two Pole RCD/Circuit Breaker Combo", "p1": 276, "p2": 188, "p3": 235, "p4": 147}, {"code": "SBU-0250-0210", "desc": "Single Phase Switchboard Upgrade (small)", "p1": 1411, "p2": 1323, "p3": 1199, "p4": 1111}, {"code": "SBU-0350-0240", "desc": "Single Phase Switchboard Upgrade (medium)", "p1": 1683, "p2": 1595, "p3": 1431, "p4": 1343}, {"code": "SBU-0450-0360", "desc": "Single Phase Switchboard Upgrade (large)", "p1": 2383, "p2": 2295, "p3": 2026, "p4": 1938}, {"code": "SBU-0460-0360", "desc": "Three Phase Switchboard Upgrade (small)", "p1": 2396, "p2": 2308, "p3": 2037, "p4": 1949}, {"code": "SBU-0500-0420", "desc": "Three Phase Switchboard Upgrade (medium)", "p1": 2733, "p2": 2645, "p3": 2323, "p4": 2235}, {"code": "SBU-0650-0480", "desc": "Three Phase Switchboard Upgrade (large)", "p1": 3213, "p2": 3125, "p3": 2731, "p4": 2643}, {"code": "SBU-0150-0030", "desc": "Supply & Install Surge Protector - Single Phase", "p1": 426, "p2": 338, "p3": 362, "p4": 274}, {"code": "SBU-0450-0060", "desc": "Supply & Install Surge Protector - Three Phase", "p1": 958, "p2": 870, "p3": 814, "p4": 726}]}, {"title": "Mains - Overhead & Underground", "items": [{"code": "MOU-0250-0270", "desc": "Overhead Mains Upgrade - Single Phase", "p1": 1696, "p2": 1608, "p3": 1442, "p4": 1354}, {"code": "MOU-0500-0360", "desc": "Overhead Mains Upgrade - Three Phase", "p1": 2448, "p2": 2360, "p3": 2081, "p4": 1993}, {"code": "MOU-0800-0300", "desc": "Underground Mains Upgrade - Single Phase", "p1": 2553, "p2": 2465, "p3": 2170, "p4": 2082}, {"code": "MOU-1100-0360", "desc": "Underground Mains Upgrade - Three Phase", "p1": 3228, "p2": 3140, "p3": 2744, "p4": 2656}]}, {"title": "Home Re-Wire", "items": [{"code": "HRW-2500-1920", "desc": "Complete Re-Wire of 2-Bedroom Home", "p1": 12458, "p2": 12370, "p3": 10589, "p4": 10501}, {"code": "HRW-3000-2400", "desc": "Complete Re-Wire of 3-Bedroom Home", "p1": 15388, "p2": 15300, "p3": 13080, "p4": 12992}, {"code": "HRW-3500-2880", "desc": "Complete Re-Wire of 4-Bedroom Home", "p1": 18318, "p2": 18230, "p3": 15570, "p4": 15482}, {"code": "HRW-4000-3360", "desc": "Complete Re-Wire of 5-Bedroom Home", "p1": 21248, "p2": 21160, "p3": 18061, "p4": 17973}]}, {"title": "Split System Air Conditioning", "items": [{"code": "SSA-0950-0240", "desc": "Supply & Install 2.5kw Split System - back to back", "p1": 2063, "p2": 1975, "p3": 1754, "p4": 1666}, {"code": "SSA-1000-0240", "desc": "Supply & Install 3.5kw Split System - back to back", "p1": 2128, "p2": 2040, "p3": 1809, "p4": 1721}, {"code": "SSA-1500-0300", "desc": "Supply & Install 5kw Split System - back to back", "p1": 2963, "p2": 2875, "p3": 2519, "p4": 2431}, {"code": "SSA-2000-0300", "desc": "Supply & Install 7kw Split System - back to back", "p1": 3613, "p2": 3525, "p3": 3071, "p4": 2983}, {"code": "SSA-0150-0210", "desc": "Install Customer Supplied Split System 2.5-3.5kw", "p1": 931, "p2": 843, "p3": 791, "p4": 703}, {"code": "SSA-0250-0270", "desc": "Install Customer Supplied Split System 4-8kw", "p1": 1246, "p2": 1158, "p3": 1059, "p4": 971}, {"code": "SSA-5500-0480", "desc": "Install/Replace Customer Supplied Ducted AC System (7-16kw)", "p1": 8718, "p2": 8630, "p3": 7410, "p4": 7322}, {"code": "SSA-0000-0045", "desc": "Clean & Service Small Split System (bedroom)", "p1": 227, "p2": 139, "p3": 193, "p4": 105}, {"code": "SSA-0000-0060", "desc": "Clean & Service Large Split System (lounge)", "p1": 273, "p2": 185, "p3": 232, "p4": 144}, {"code": "SSA-0000-0090", "desc": "Filter Clean & Service Ducted Air Conditioner", "p1": 366, "p2": 278, "p3": 311, "p4": 223}]}, {"title": "TV Antenna & Points", "items": [{"code": "TVI-0020-0020", "desc": "Supply & Replace Existing TV/Foxtel Outlet", "p1": 209, "p2": 121, "p3": 178, "p4": 90}, {"code": "TVI-0060-0030", "desc": "Supply & Install TV/Foxtel Outlet (30 min)", "p1": 309, "p2": 221, "p3": 263, "p4": 175}, {"code": "TVI-0070-0060", "desc": "Supply & Install TV/Foxtel Outlet (60 min)", "p1": 464, "p2": 376, "p3": 394, "p4": 306}, {"code": "TVI-0130-0045", "desc": "Supply & Install Digital Antenna (45 min)", "p1": 471, "p2": 383, "p3": 400, "p4": 312}, {"code": "TVI-0130-0060", "desc": "Supply & Install Digital Antenna (60 min)", "p1": 542, "p2": 454, "p3": 461, "p4": 373}, {"code": "TVI-0100-0030", "desc": "Supply & Replace Digital Antenna", "p1": 361, "p2": 273, "p3": 307, "p4": 219}, {"code": "TVI-0050-0030", "desc": "Supply & Install Amplifier", "p1": 296, "p2": 208, "p3": 252, "p4": 164}]}, {"title": "Phone & Data", "items": [{"code": "PHD-0015-0030", "desc": "Supply & Replace Phone Socket", "p1": 250, "p2": 162, "p3": 213, "p4": 125}, {"code": "PHD-0030-0030", "desc": "Supply & Install Phone Socket (30 min)", "p1": 270, "p2": 182, "p3": 230, "p4": 142}, {"code": "PHD-0030-0060", "desc": "Supply & Install Phone Socket (60 min)", "p1": 412, "p2": 324, "p3": 350, "p4": 262}, {"code": "PHD-0020-0030", "desc": "Supply & Replace RJ45 Data Socket", "p1": 257, "p2": 169, "p3": 218, "p4": 130}, {"code": "PHD-0050-0030", "desc": "Supply & Install RJ45 Data Socket (30 min)", "p1": 296, "p2": 208, "p3": 252, "p4": 164}, {"code": "PHD-0050-0045", "desc": "Supply & Install RJ45 Data Socket (45 min)", "p1": 367, "p2": 279, "p3": 312, "p4": 224}, {"code": "PHD-0050-0060", "desc": "Supply & Install RJ45 Data Socket (60 min)", "p1": 438, "p2": 350, "p3": 372, "p4": 284}, {"code": "PHD-0050-0090", "desc": "Supply & Install RJ45 Data Socket (90 min)", "p1": 581, "p2": 493, "p3": 494, "p4": 406}, {"code": "PHD-0070-0020", "desc": "Supply & Install 5 Port Gbit Switch", "p1": 274, "p2": 186, "p3": 233, "p4": 145}, {"code": "PHD-0120-0020", "desc": "Supply & Install 8 Port Gbit Switch", "p1": 339, "p2": 251, "p3": 288, "p4": 200}]}];
+
+const SECTION_ICONS = ['🔍','🔥','🔌','💡','🔦','⚡','🔆','🔄','🔃','🌀','🚨','🧪','🏢','🔧','🗂️','⚙️','🔗','🏠','❄️','📡','📞'];
+const PRICE_LABELS = ['','Regular Rate','Add-On Rate','Discounted','Disc. Add-On'];
+const PRICE_KEYS = ['','p1','p2','p3','p4'];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentTab = 'browse';
+let currentSection = null;
+let currentPriceType = 1;
+let jobItems = [];
+let sigDrawing = false;
+let sigCtx = null;
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderSections();
+  initSig();
+  document.getElementById('js-date').value = new Date().toISOString().split('T')[0];
+});
+
+// ── PRICE CALCULATOR ─────────────────────────────────────────────────────────
+function setTime(hrs, btn) {
+  // Deselect all time buttons
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+  // Select tapped button
+  btn.classList.add('selected');
+  // Store value
+  document.getElementById('calc-hrs').value = hrs;
+  calcPrice();
+}
+
+function calcPrice() {
+  const mat    = parseFloat(document.getElementById('calc-mat').value);
+  const hrs    = parseFloat(document.getElementById('calc-hrs').value);
+  const rate   = parseFloat(document.getElementById('calc-rate').value) || 185;
+  const markup = (parseFloat(document.getElementById('calc-markup').value) || 30) / 100 + 1;
+  const disc   = 0.15;
+  const CALLOUT = 88;
+
+  // Need both values to show result
+  if (isNaN(mat) || isNaN(hrs) || hrs === 0) {
+    document.getElementById('calc-result').style.display = 'none';
+    document.getElementById('calc-placeholder').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('calc-result').style.display = 'block';
+  document.getElementById('calc-placeholder').style.display = 'none';
+
+  const matWithMarkup = mat * markup;
+  const labourCost    = hrs * rate;
+  const basePrice     = Math.round(matWithMarkup + labourCost);
+
+  const p1 = basePrice + CALLOUT;
+  const p2 = basePrice;
+  const p3 = Math.round(p1 * (1 - disc));
+  const p4 = Math.round(p2 * (1 - disc));
+
+  // Format labour time label
+  const selectedBtn = document.querySelector('.time-btn.selected');
+  const timeLabel   = selectedBtn ? selectedBtn.textContent : `${hrs}hr`;
+
+  // Breakdown
+  document.getElementById('calc-breakdown').innerHTML =
+    `Mat: $${mat.toFixed(0)} × ${((markup-1)*100).toFixed(0)}% = <strong style="color:var(--text)">$${matWithMarkup.toFixed(0)}</strong><br>` +
+    `Labour: ${timeLabel} × $${rate}/hr = <strong style="color:var(--text)">$${labourCost.toFixed(0)}</strong><br>` +
+    `Base: <strong style="color:var(--text)">$${basePrice}</strong>  ·  Callout: <strong style="color:var(--text)">$${CALLOUT}</strong>`;
+
+  // 4 price boxes
+  const priceData = [
+    { label:'Regular Rate',    sub:'Incl. callout',         val:p1, col:'var(--text)'   },
+    { label:'Add-On Rate',     sub:'No callout',            val:p2, col:'var(--blue)'   },
+    { label:'Discounted Rate', sub:'15% off + callout',     val:p3, col:'var(--green)'  },
+    { label:'Disc. Add-On',    sub:'15% off, no callout',   val:p4, col:'var(--orange)' },
+  ];
+
+  document.getElementById('calc-prices-grid').innerHTML = priceData.map(p => `
+    <div style="background:var(--dark2);border-radius:10px;padding:10px;text-align:center">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px">${p.label}</div>
+      <div style="font-size:24px;font-weight:900;color:${p.col}">$${p.val}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px">${p.sub}</div>
+    </div>
+  `).join('');
+
+  // Add buttons
+  const addBtns = [
+    { label:'Regular Rate',  val:p1, type:'Regular Rate'   },
+    { label:'Add-On Rate',   val:p2, type:'Add-On Rate'    },
+    { label:'Disc. Rate',    val:p3, type:'Discounted Rate' },
+    { label:'Disc. Add-On',  val:p4, type:'Disc. Add-On'   },
+  ];
+  document.getElementById('calc-add-btns').innerHTML = addBtns.map(b => `
+    <button onclick="addCalcItem(${b.val},'${b.type}')"
+      style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 6px;font-size:12px;font-weight:700;cursor:pointer;line-height:1.5">
+      + ${b.label}<br><span style="color:var(--yellow);font-size:16px;font-weight:900">$${b.val}</span>
+    </button>
+  `).join('');
+
+  // Auto-fill description if empty
+  const descEl = document.getElementById('calc-desc');
+  if (!descEl.value) {
+    descEl.placeholder = `Mat $${mat.toFixed(0)} · ${timeLabel} labour`;
+  }
+}
+
+function addCalcItem(price, priceType) {
+  const mat      = document.getElementById('calc-mat').value  || '0';
+  const selectedBtn = document.querySelector('.time-btn.selected');
+  const timeLabel   = selectedBtn ? selectedBtn.textContent : document.getElementById('calc-hrs').value + 'hr';
+  const desc     = document.getElementById('calc-desc').value.trim()
+                 || `Custom job: Mat $${mat} · ${timeLabel} labour`;
+
+  jobItems.push({
+    code:      `CALC-${String(mat).padStart(4,'0')}-${timeLabel.replace(' ','')}`,
+    desc:      desc,
+    price:     price,
+    priceType: priceType,
+    priceKey:  'calc'
+  });
+  updateCart();
+  showNotif(`✓ Added $${price} — ${priceType}`);
+}
+
+
+
+function renderSections() {
+  const grid = document.getElementById('sections-grid');
+  grid.innerHTML = SECTIONS.map((s, i) => `
+    <div class="section-card" onclick="openSection(${i})">
+      <div class="section-icon">${SECTION_ICONS[i] || '⚡'}</div>
+      <div class="section-title">${s.title}</div>
+      <div class="section-count">${s.items.length} items</div>
+    </div>
+  `).join('');
+}
+
+function openSection(idx) {
+  currentSection = idx;
+  const s = SECTIONS[idx];
+  document.getElementById('sections-view').classList.add('hidden');
+  document.getElementById('search-view').classList.add('hidden');
+  document.getElementById('items-view').classList.remove('hidden');
+  document.getElementById('items-title').textContent = s.title;
+  renderItems(s.items);
+}
+
+function backToSections() {
+  document.getElementById('items-view').classList.add('hidden');
+  document.getElementById('search-view').classList.add('hidden');
+  document.getElementById('sections-view').classList.remove('hidden');
+  document.getElementById('search-input').value = '';
+  currentSection = null;
+}
+
+function pillHTML(item) {
+  const iq = JSON.stringify(item).replace(/"/g,'&quot;');
+  return `
+    <div class="price-row">
+      <div class="price-pill pp1" onclick="addItemDirect(${iq},1)">
+        <div class="price-label">Regular</div>
+        <div class="price-val p1">$${item.p1}</div>
+        <div class="price-tap">tap to add</div>
+      </div>
+      <div class="price-pill pp2" onclick="addItemDirect(${iq},2)">
+        <div class="price-label">Add-On</div>
+        <div class="price-val p2">$${item.p2}</div>
+        <div class="price-tap">tap to add</div>
+      </div>
+      <div class="price-pill pp3" onclick="addItemDirect(${iq},3)">
+        <div class="price-label">Discounted</div>
+        <div class="price-val p3">$${item.p3}</div>
+        <div class="price-tap">tap to add</div>
+      </div>
+      <div class="price-pill pp4" onclick="addItemDirect(${iq},4)">
+        <div class="price-label">Disc. Add-On</div>
+        <div class="price-val p4">$${item.p4}</div>
+        <div class="price-tap">tap to add</div>
+      </div>
+    </div>`;
+}
+
+function renderItems(items) {
+  document.getElementById('items-list').innerHTML = items.map(item => `
+    <div class="item-card">
+      <div class="item-desc">${item.desc}</div>
+      <div class="item-code">${item.code}</div>
+      ${pillHTML(item)}
+    </div>
+  `).join('');
+}
+
+// ── SEARCH ──────────────────────────────────────────────────────────────────
+function handleSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  if (!q) {
+    document.getElementById('search-view').classList.add('hidden');
+    if (currentSection !== null) {
+      document.getElementById('items-view').classList.remove('hidden');
+    } else {
+      document.getElementById('sections-view').classList.remove('hidden');
+    }
+    return;
+  }
+  document.getElementById('sections-view').classList.add('hidden');
+  document.getElementById('items-view').classList.add('hidden');
+  document.getElementById('search-view').classList.remove('hidden');
+
+  const results = [];
+  SECTIONS.forEach(s => {
+    s.items.forEach(item => {
+      if (item.desc.toLowerCase().includes(q) || item.code.toLowerCase().includes(q)) {
+        results.push(item);
+      }
+    });
+  });
+  document.getElementById('search-title').textContent = `${results.length} results for "${q}"`;
+  const pk = PRICE_KEYS[currentPriceType];
+  document.getElementById('search-list').innerHTML = results.length
+    ? results.map(item => `
+      <div class="item-card">
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-code">${item.code}</div>
+        ${pillHTML(item)}
+      </div>`).join('')
+    : '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">No results found</div></div>';
+}
+
+// ── PRICE TYPE ───────────────────────────────────────────────────────────────
+function setPriceType(t) {
+  currentPriceType = t;
+  [1,2,3,4].forEach(i => {
+    const btn = document.getElementById(`ptbtn-${i}`);
+    btn.className = 'pt-btn' + (i === t ? ` active-p${i}` : '');
+  });
+  if (currentSection !== null) renderItems(SECTIONS[currentSection].items);
+  const q = document.getElementById('search-input').value.trim();
+  if (q) handleSearch();
+}
+
+// ── JOB ITEMS ────────────────────────────────────────────────────────────────
+function addItemDirect(item, priceNum) {
+  const pk    = PRICE_KEYS[priceNum];
+  const label = PRICE_LABELS[priceNum];
+  jobItems.push({
+    code:      item.code,
+    desc:      item.desc,
+    price:     item[pk],
+    priceType: label,
+    priceKey:  pk
+  });
+  updateCart();
+  showNotif(`✓ $${item[pk]} — ${label}`);
+}
+
+
+function removeItem(idx) {
+  jobItems.splice(idx, 1);
+  updateCart();
+  renderJobItems();
+}
+
+function updateCart() {
+  const count = jobItems.length;
+  document.getElementById('cart-count').textContent = count;
+  renderJobItems();
+}
+
+function renderJobItems() {
+  const list = document.getElementById('job-items-list');
+  const empty = document.getElementById('job-empty');
+  if (jobItems.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    empty.classList.remove('hidden');
+    updateTotals(0);
+    return;
+  }
+  let total = 0;
+  list.innerHTML = jobItems.map((item, i) => {
+    total += item.price;
+    return `
+    <div class="job-item">
+      <div class="job-item-info">
+        <div class="job-item-desc">${item.desc}</div>
+        <div class="job-item-code">${item.code} · ${item.priceType}</div>
+      </div>
+      <div>
+        <div class="job-item-price">$${item.price}</div>
+        <div class="job-item-type">${item.priceType}</div>
+      </div>
+      <button class="remove-btn" onclick="removeItem(${i})">✕</button>
+    </div>`;
+  }).join('');
+  updateTotals(total);
+}
+
+function updateTotals(total) {
+  const exGST = Math.round(total / 1.1);
+  const gst   = total - exGST;
+  document.getElementById('tot-ex').textContent  = `$${exGST.toLocaleString()}`;
+  document.getElementById('tot-gst').textContent = `$${gst.toLocaleString()}`;
+  document.getElementById('tot-inc').textContent = `$${total.toLocaleString()}`;
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`view-${tab}`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if (tab === 'jobsheet') renderJobItems();
+}
+
+// ── SIGNATURE ────────────────────────────────────────────────────────────────
+function initSig() {
+  const canvas = document.getElementById('sig-canvas');
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 120;
+  sigCtx = canvas.getContext('2d');
+  sigCtx.strokeStyle = '#000';
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = 'round';
+
+  const getPos = (e) => {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  canvas.addEventListener('mousedown', e => { sigDrawing = true; const p = getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove', e => { if (!sigDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); });
+  canvas.addEventListener('mouseup', () => sigDrawing = false);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); sigDrawing = true; const p = getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y); }, {passive:false});
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!sigDrawing) return; const p = getPos(e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke(); }, {passive:false});
+  canvas.addEventListener('touchend', () => sigDrawing = false);
+}
+
+function clearSig() {
+  const canvas = document.getElementById('sig-canvas');
+  sigCtx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── EXPORT ───────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const rows = [['Item Code','Description','Price Type','Price (incl GST)','Ex GST']];
+  let total = 0;
+  jobItems.forEach(item => {
+    const ex = Math.round(item.price / 1.1);
+    rows.push([item.code, item.desc, item.priceType, item.price, ex]);
+    total += item.price;
+  });
+  rows.push(['','','TOTAL (incl GST)', total, Math.round(total/1.1)]);
+  const customer = document.getElementById('js-customer').value || 'Customer';
+  const date = document.getElementById('js-date').value || new Date().toISOString().split('T')[0];
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  download(`JobSheet_${customer}_${date}.csv`, csv, 'text/csv');
+  closeExportModal();
+  showNotif('✓ CSV exported!');
+}
+
+function exportServiceM8() {
+  const rows = [['Item Number','Name','Cost','Price','Tax Rate','Active','Unit','Notes']];
+  jobItems.forEach(item => {
+    rows.push([item.code, item.desc, Math.round(item.price/1.3), item.price, 'GST', 'TRUE', 'EA', item.priceType]);
+  });
+  download('ServiceM8_Import.csv', rows.map(r => r.map(c=>`"${c}"`).join(',')).join('\n'), 'text/csv');
+  closeExportModal();
+  showNotif('✓ ServiceM8 CSV exported!');
+}
+
+function exportSimPro() {
+  const rows = [['Group','Subgroup 1','Subgroup 2','Subgroup 3','Part Number','Description','Cost Price','Trade Price','Unit of Measure','Notes']];
+  jobItems.forEach(item => {
+    const section = SECTIONS.find(s => s.items.some(i => i.code === item.code));
+    const group = section ? section.title : 'General';
+    rows.push([group, group.split(' ')[0], '', '', item.code, item.desc, Math.round(item.price/1.3), item.price, 'EA', item.priceType]);
+  });
+  download('SimPro_Catalogue.csv', rows.map(r => r.map(c=>`"${c}"`).join(',')).join('\n'), 'text/csv');
+  closeExportModal();
+  showNotif('✓ SimPro CSV exported!');
+}
+
+function generateJobSheet() {
+  const customer = document.getElementById('js-customer').value || '—';
+  const phone    = document.getElementById('js-phone').value || '—';
+  const address  = document.getElementById('js-address').value || '—';
+  const tech     = document.getElementById('js-tech').value || 'David Weller';
+  const date     = document.getElementById('js-date').value || '—';
+  const jobnr    = document.getElementById('js-jobnr').value || '—';
+  const notes    = document.getElementById('js-notes').value || '—';
+  const sig      = document.getElementById('sig-canvas').toDataURL();
+  let total = 0; jobItems.forEach(i => total += i.price);
+  const exGST = Math.round(total / 1.1);
+  const gst   = total - exGST;
+
+  const itemRows = jobItems.map(item => `
+    <tr><td>${item.code}</td><td>${item.desc}</td><td style="color:#888;font-size:11px">${item.priceType}</td><td style="text-align:right;font-weight:700">$${item.price}</td></tr>
+  `).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Job Sheet</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px;color:#111}
+    h1{color:#1a1a1a;border-bottom:3px solid #FFD700;padding-bottom:8px}
+    .header{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;background:#f5f5f5;padding:14px;border-radius:8px}
+    .field label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px}
+    .field p{font-size:14px;font-weight:600;margin:2px 0 0}
+    table{width:100%;border-collapse:collapse;margin:16px 0}
+    th{background:#1a1a1a;color:white;padding:8px;text-align:left;font-size:12px}
+    td{padding:8px;border-bottom:1px solid #eee;font-size:13px}
+    tr:nth-child(even) td{background:#fafafa}
+    .total-table{width:100%;margin-top:12px}
+    .total-table td{border:none;padding:4px 8px}
+    .grand{font-size:18px;font-weight:900;color:#1a1a1a;border-top:2px solid #FFD700!important}
+    .sig-img{border:1px solid #ddd;border-radius:8px;max-width:100%}
+    .footer{margin-top:30px;font-size:11px;color:#888;text-align:center;border-top:1px solid #eee;padding-top:12px}
+  </style></head><body>
+  <h1>⚡ JOB SHEET</h1>
+  <div class="header">
+    <div class="field"><label>Customer</label><p>${customer}</p></div>
+    <div class="field"><label>Phone</label><p>${phone}</p></div>
+    <div class="field"><label>Site Address</label><p>${address}</p></div>
+    <div class="field"><label>Date</label><p>${date}</p></div>
+    <div class="field"><label>Job / Quote No.</label><p>${jobnr}</p></div>
+    <div class="field"><label>Technician</label><p>${tech}</p></div>
+  </div>
+  <table><thead><tr><th>Item Code</th><th>Description</th><th>Price Type</th><th style="text-align:right">Price (incl GST)</th></tr></thead>
+  <tbody>${itemRows}</tbody></table>
+  <table class="total-table">
+    <tr><td style="width:60%"></td><td>Subtotal (ex GST)</td><td style="text-align:right;font-weight:600">$${exGST}</td></tr>
+    <tr><td></td><td>GST (10%)</td><td style="text-align:right;font-weight:600">$${gst}</td></tr>
+    <tr class="grand"><td></td><td><strong>TOTAL (incl. GST)</strong></td><td style="text-align:right"><strong>$${total}</strong></td></tr>
+  </table>
+  ${notes !== '—' ? `<p style="margin-top:16px"><strong>Notes:</strong> ${notes}</p>` : ''}
+  <div style="margin-top:20px"><p style="font-size:12px;color:#888;margin-bottom:6px">Customer Signature — I accept this quote</p>
+  <img class="sig-img" src="${sig}" style="height:80px"></div>
+  <div class="footer">David Weller · Electrical Estimator & Pricing Consultant · 0455 345 508 · dweller5284@gmail.com<br>
+  By signing, the customer agrees to the terms of the Price Book Agreement.</div>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+function clearJob() {
+  if (!confirm('Clear all job items?')) return;
+  jobItems = [];
+  updateCart();
+  clearSig();
+  document.getElementById('js-customer').value = '';
+  document.getElementById('js-phone').value = '';
+  document.getElementById('js-address').value = '';
+  document.getElementById('js-notes').value = '';
+  document.getElementById('js-jobnr').value = '';
+}
+
+// ── MODALS ───────────────────────────────────────────────────────────────────
+function showExportModal() { document.getElementById('export-modal').classList.remove('hidden'); }
+function closeExportModal(e) {
+  if (!e || e.target === document.getElementById('export-modal')) {
+    document.getElementById('export-modal').classList.add('hidden');
+  }
+}
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function download(filename, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type}));
+  a.download = filename;
+  a.click();
+}
+
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.remove('hidden');
+  setTimeout(() => n.classList.add('hidden'), 2000);
+}
+</script>
+</body>
+</html>
